@@ -1,0 +1,131 @@
+-- default to beginning of time
+SET 'auto.offset.reset'='earliest';
+
+--CREAMOS UN STREAM DE CUSTOMERS
+CREATE stream CUSTOMERS (
+dwh_customer_key INT,
+document_id VARCHAR,
+contact_phone1_id VARCHAR,
+customer_ini_day_key BIGINT,
+customer_end_day_key BIGINT,
+ts VARCHAR)
+WITH (kafka_topic='dbserver1.rosetta.customers', value_format='json',
+    timestamp='ts', timestamp_format='yyyy-MM-dd''T''HH:mm:ssX');
+
+--STREAM DE CLIENTES PARTICIONADO POR DOCUMENTO
+CREATE stream CUSTOMERS_KEY_DOC WITH(timestamp='ts', timestamp_format='yyyy-MM-dd''T''HH:mm:ssX') AS
+    SELECT dwh_customer_key, document_id, customer_ini_day_key, customer_end_day_key, ts
+    FROM CUSTOMERS EMIT CHANGES PARTITION BY document_id;
+
+
+
+--CREAMOS UN STREAM DE SERVICIOS DE CLIENTE
+CREATE stream CUSTOMER_SERVICES (
+service_id INT,
+dwh_customer_key INT,
+service_type INT,
+service_value VARCHAR,
+ts VARCHAR)
+WITH (kafka_topic='dbserver1.rosetta.osp_services_cust', value_format='json',
+    timestamp='ts', timestamp_format='yyyy-MM-dd''T''HH:mm:ssX');
+
+--CREAMOS STREAM CUSTOMER WITH KEY
+CREATE stream SERVICES_REKEYED WITH(timestamp='ts', timestamp_format='yyyy-MM-dd''T''HH:mm:ssX') AS
+    SELECT dwh_customer_key AS id_cliente, service_value as telefono, ts
+    FROM CUSTOMER_SERVICES WHERE service_type=2 EMIT CHANGES PARTITION BY id_cliente;
+
+CREATE TABLE SERVICES_T (id_cliente INT, telefono VARCHAR)
+    WITH(KAFKA_TOPIC='SERVICES_REKEYED', VALUE_FORMAT='json', KEY='id_cliente');
+
+
+--CREAMOS UN STREAM DE SCORING
+CREATE stream SCORING (
+scr_id INT,
+document_id VARCHAR,
+riesgo VARCHAR,
+scr_date BIGINT,
+ts VARCHAR)
+WITH (kafka_topic='dbserver1.rosetta.scoring', value_format='json',
+    timestamp='ts', timestamp_format='yyyy-MM-dd''T''HH:mm:ssX');
+
+--CREAMOS UN STREAM CON NUEVA CLAVE
+CREATE stream SCORING_REKEYED WITH(timestamp='ts', timestamp_format='yyyy-MM-dd''T''HH:mm:ssX') AS
+    SELECT document_id, riesgo, ts
+    FROM SCORING EMIT CHANGES PARTITION BY document_id;
+
+CREATE TABLE SCORING_T (document_id VARCHAR, riesgo VARCHAR)
+WITH (kafka_topic='SCORING_REKEYED', value_format='json', key='document_id');
+
+
+
+--CREAMOS UN STREAM DE PORTABILIDADES
+CREATE stream PORTABILIDADES (
+portab_request_id INT,
+directory_number_id VARCHAR,
+portab_doc_id VARCHAR,
+portab_type_des VARCHAR,
+donor_operator_des VARCHAR,
+receiving_operator_des VARCHAR,
+portab_order_date BIGINT,
+ts VARCHAR)
+WITH (kafka_topic='dbserver1.rosetta.porta_orders', value_format='json',
+    timestamp='ts', timestamp_format='yyyy-MM-dd''T''HH:mm:ssX');
+
+--CREAMOS UN STREAM DE PORTABILIDADES CON RIESGO
+CREATE stream PORTA_ENR_SCR AS
+    SELECT p.directory_number_id + '-' + p.portab_doc_id AS telef_y_doc, p.directory_number_id, p.portab_doc_id,
+    p.portab_type_des, p.donor_operator_des, p.receiving_operator_des, p.portab_order_date, p.ts, s.riesgo
+    FROM PORTABILIDADES p
+		LEFT OUTER JOIN SCORING_T s
+             ON p.portab_doc_id = s.document_id EMIT CHANGES PARTITION BY telef_y_doc;
+
+--CREAMOS UNA TABLA PARA PORTABILIDADES
+CREATE TABLE PORTABILIDADES_T (telef_y_doc VARCHAR, directory_number_id VARCHAR, portab_doc_id VARCHAR,
+    donor_operator_des VARCHAR, receiving_operator_des VARCHAR, riesgo VARCHAR)
+    WITH(KAFKA_TOPIC='PORTA_ENR_SCR', VALUE_FORMAT='json', KEY='telef_y_doc');
+
+--CLIENTE ENRIQUECIDO CON TELEFONO
+CREATE STREAM CLIENTES_ENR WITH (VALUE_FORMAT='json') AS
+    SELECT s.telefono + '-' + c.document_id AS telef_y_doc,
+           c.dwh_customer_key,
+           c.document_id,
+           s.telefono,
+           CASE WHEN c.customer_end_day_key IS NULL
+                THEN 1 ELSE 0 END AS cliente_orange,
+           CASE WHEN c.customer_end_day_key IS NOT NULL
+                THEN CAST((c.customer_end_day_key - c.customer_ini_day_key)/1000/60/60/24 AS INTEGER) ELSE 0 END AS days_excliente
+    FROM CUSTOMERS_KEY_DOC c
+            INNER JOIN SERVICES_T s
+                ON c.dwh_customer_key = s.id_cliente EMIT CHANGES PARTITION BY telef_y_doc;
+
+--CLIENTE ENRIQUECIDO CON RIESGO
+CREATE STREAM CLIENTES_ENR_SCR WITH (VALUE_FORMAT='json') AS
+    SELECT c.telef_y_doc,
+           c.document_id,
+           c.telefono,
+           c.cliente_orange,
+           c.days_excliente,
+		   s.riesgo
+    FROM CLIENTES_ENR c
+            LEFT OUTER JOIN SCORING_T s
+                ON c.document_id = s.document_id EMIT CHANGES PARTITION BY telef_y_doc;
+
+--CREAMOS UNA TABLA PARA CLIENTES
+CREATE TABLE CLIENTES_T (telef_y_doc VARCHAR, c_document_id VARCHAR,
+        telefono VARCHAR, cliente_orange INT, days_excliente INT, riesgo VARCHAR)
+    WITH(KAFKA_TOPIC='CLIENTES_ENR_SCR', VALUE_FORMAT='json', KEY='telef_y_doc');
+
+--CUADRO DE MANDO CLIENTES ORANGE
+CREATE TABLE CLIENTES_PORTA_SCR_T AS
+    SELECT CASE WHEN c.telef_y_doc IS NOT NULL THEN c.telef_y_doc ELSE p.telef_y_doc END AS telef_y_doc,
+		   CASE WHEN c.telefono IS NOT NULL THEN c.telefono ELSE p.directory_number_id END AS telefono,
+		   CASE WHEN c.c_document_id IS NOT NULL THEN c.c_document_id ELSE p.portab_doc_id END AS doc_cliente,
+           CASE WHEN c.cliente_orange IS NULL THEN 0 ELSE c.cliente_orange END AS cliente_orange,
+           c.days_excliente,
+           CASE WHEN c.cliente_orange=1 THEN 'ORANGE'
+			WHEN ((c.cliente_orange=0 OR c.cliente_orange IS NULL) AND p.donor_operator_des<>'ORANGE')
+            THEN p.donor_operator_des ELSE p.receiving_operator_des END AS operador_actual,
+		   CASE WHEN p.riesgo IS NOT NULL THEN p.riesgo ELSE c.riesgo END AS riesgo
+    FROM CLIENTES_T c
+           FULL OUTER JOIN PORTABILIDADES_T p ON c.telef_y_doc = p.telef_y_doc EMIT CHANGES;
+

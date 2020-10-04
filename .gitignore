@@ -1,0 +1,14 @@
+.idea/*
+data/*
+*.swp
+.vscode/*
+datagen/OLD/*
+worksheet/*
+ext/*java/.classpath/*
+java/.project/*
+java/.settings/*
+java/.classpath
+java/.project
+java/.idea/*
+pid_file.txt
+log.txt

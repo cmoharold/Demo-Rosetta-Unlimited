@@ -1,0 +1,13 @@
+SET 'auto.offset.reset'='earliest';
+
+CREATE stream CALLS
+WITH (kafka_topic='CALLS', value_format='avro', timestamp='calltime');
+
+CREATE TABLE CALLS_AGG as select windowstart() as window_start_ts,
+cast(id_telef_origen as string) as id_telef_origen,
+count(*) as calls_count,
+max(duracion_origen) as max_duracion_origen,
+sum(duracion_origen) as total_duracion_origen,
+sum(duracion_origen)/count(*) as avg_duracion_origen
+from CALLS window tumbling (size 1 hour)
+group by id_telef_origen EMIT CHANGES;

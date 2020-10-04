@@ -1,0 +1,27 @@
+-- default to beginning of time
+SET 'auto.offset.reset'='earliest';
+
+CREATE TABLE CALLS_CLIENTES_ENR AS
+	SELECT TIMESTAMPTOSTRING(c.window_start_ts,'yyyy-MM-dd HH:mm:ss') AS fecha_hora_llamada,
+		c.id_telef_origen,
+		c.calls_count AS total_llamadas,
+		c.total_duracion_origen AS total_duracion_llamadas,
+		o.doc_cliente,
+		o.cliente_orange,
+		o.operador_actual,
+		o.riesgo
+	FROM CALLS_AGG_T c
+		LEFT JOIN CLIENTES_ORANGE_REKEYED o ON c.id_telef_origen = o.telefono EMIT CHANGES;
+
+
+CREATE TABLE CALLS_CLIENTES_ENR_two AS
+	SELECT TIMESTAMPTOSTRING(c.window_start_ts,'yyyy-MM-dd HH:mm:ss') AS fecha_hora_llamada,
+		c.id_telef_origen,
+		c.calls_count AS total_llamadas,
+		c.total_duracion_origen AS total_duracion_llamadas,
+		o.doc_cliente,
+		o.cliente_orange,
+		o.operador_actual,
+		o.riesgo
+	FROM CLIENTES_ORANGE_REKEYED o
+		LEFT JOIN CALLS_AGG_T c ON o.telefono = c.id_telef_origen EMIT CHANGES;

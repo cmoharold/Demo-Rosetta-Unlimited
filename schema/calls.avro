@@ -1,0 +1,99 @@
+{
+  "namespace": "streams",
+  "name": "calls",
+  "type": "record",
+  "fields": [
+  	{
+      "name": "id_telef_origen",
+      "type": {
+        "type": "long",
+        "arg.properties": {
+          "range": {"min": 600000000, "max": 600000020}
+        }
+      }
+    },
+	{
+		"name": "id_telef_destino",
+		"type": {
+		"type": "long",
+		"arg.properties": {
+			"range": {"min": 600000000, "max": 600000020}
+			}
+		}
+	},
+	{
+		"name":"calltime",
+		"type":{
+			"type":"long",
+			"arg.properties":{
+				"range":{"min":1579040874000, "max":1579213674000}
+			}
+		}
+	},
+    {
+      "name": "duracion_origen",
+      "type": {
+        "type": "long",
+        "arg.properties": {
+          "range": {"min": 0, "max": 10}
+        }
+      }
+    },
+    {
+      "name": "pais_origen",
+      "type": {
+        "type": "string",
+        "arg.properties": {
+          "options": [
+            "SPAIN",
+            "SPAIN",
+            "SPAIN",
+            "SPAIN",
+            "OTRO"
+          ]
+        }
+      }
+    },
+    {
+      "name": "pais_destino",
+      "type": {
+        "type": "string",
+        "arg.properties": {
+          "options": [
+            "SPAIN",
+            "SPAIN",
+            "SPAIN",
+            "SPAIN",
+            "OTRO"
+          ]
+        }
+      }
+    },
+    {
+      "name": "operador_origen",
+      "type": {
+        "type": "string",
+        "arg.properties": {
+          "options": [
+            "ORANGE",
+			"MOVISTAR",
+			"VODAFONE"
+          ]
+        }
+      }
+    },
+    {
+      "name": "operador_destino",
+      "type": {
+        "type": "string",
+        "arg.properties": {
+          "options": [
+			"ORANGE",
+			"MOVISTAR",
+			"VODAFONE"
+          ]
+        }
+      }
+    }
+  ]
+}
