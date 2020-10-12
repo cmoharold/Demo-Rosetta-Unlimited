@@ -34,9 +34,9 @@ else
 
     message "Starting ksql-datagen for topic CALLS"
     #nohup ksql-datagen schema=./datagen/calls.avro format=avro topic=CALLS key=id_telef_origen maxInterval=${MAX_INTERVAL} iterations=${DATAGEN_ITERATIONS} > /dev/null 2>&1 &
-    nohup confluent local config datagen-calls -- -d ./connector/datagen-calls.json > /dev/null 2>&1 &
+    nohup confluent local config datagen-calls -- -d ./connectors/datagen-calls.json > /dev/null 2>&1 &
     echo ${!} >> ${PID_FILE}
-    #curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @./connector/datagen-calls.json
+    #curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @./connectors/datagen-calls.json
 
     #kafka-avro-console-consumer --bootstrap-server localhost:9092 --topic CALLS
 

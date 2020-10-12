@@ -30,7 +30,7 @@ if [[ ! -z "$1" && $1 == 'ksql' ]]; then
 EOF
 else
     message "Starting debezium connector for topics ROSETTA"
-    nohup confluent local config rosetta-connector -- -d ./connector/dbz-rosetta.json > /dev/null 2>&1 &
+    nohup confluent local config rosetta-connector -- -d ./connectors/dbz-rosetta.json > /dev/null 2>&1 &
     echo ${!} >> ${PID_FILE}
     #confluent local consume dbserver1.rosetta.customers -- --from-beginning
 

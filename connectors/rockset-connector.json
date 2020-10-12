@@ -1,0 +1,16 @@
+{
+  "name": "Rosetta-Demo",
+  "config": {
+    "connector.class":"rockset.RocksetSinkConnector",
+    "tasks.max":1,
+    "topics":"CALLS_CLIENTES_ENR",
+    "rockset.task.threads":1,
+    "rockset.apiserver.url":"https://api.rs2.usw2.rockset.com",
+    "rockset.integration.key":"kafka://your_integration_key@api.rs2.usw2.rockset.com",
+    "format":"AVRO",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter":"io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url":"http://localhost:8081",
+    "key.converter.schemas.enable":"false"
+  }
+}
