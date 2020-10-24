@@ -2,12 +2,14 @@
 
 Demonstration of the use of technologies related to data streaming processing.
 - [Apache Kafka](https://kafka.apache.org/)
-- [Confluent Platform](https://www.confluent.io//)
+- [Confluent Platform](https://www.confluent.io/)
 - [Debezium Connector](https://debezium.io/documentation/reference/1.3/connectors/mysql.html/)
 - [Kafka Connect Datagen](https://www.confluent.io/hub/confluentinc/kafka-connect-datagen/)
+- [Elasticsearch Sink Connector Connector](https://docs.confluent.io/current/connect/kafka-connect-elasticsearch/index.html/)
 - [Kafka Streams](https://kafka.apache.org/documentation/streams/)
 - [KsqlDB](https://ksqldb.io/)
 - [MySQL](https://www.mysql.com/)
+- [Elastic](https://www.elastic.co/es/elastic-stack/)
 
 ## Architecture
 
@@ -28,8 +30,6 @@ foo@bar:~$ ./setup-demo-calls.sh
 foo@bar:~$ ./setup-demo-calls.sh ksql
 foo@bar:~$ ./setup-demo-calls-customers.sh
 ```
-
-You can delete the current file by clicking the **Remove** button in the file explorer. The file will be moved into the **Trash** folder and automatically deleted after 7 days of inactivity.
 
 ## Checks
 
