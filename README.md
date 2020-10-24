@@ -5,7 +5,7 @@ Demonstration of the use of technologies related to data streaming processing.
 - [Confluent Platform](https://www.confluent.io/)
 - [Debezium Connector](https://debezium.io/documentation/reference/1.3/connectors/mysql.html/)
 - [Kafka Connect Datagen](https://www.confluent.io/hub/confluentinc/kafka-connect-datagen/)
-- [Elasticsearch Sink Connector Connector](https://docs.confluent.io/current/connect/kafka-connect-elasticsearch/index.html/)
+- [Elasticsearch Sink Connector](https://docs.confluent.io/current/connect/kafka-connect-elasticsearch/index.html/)
 - [Kafka Streams](https://kafka.apache.org/documentation/streams/)
 - [KsqlDB](https://ksqldb.io/)
 - [MySQL](https://www.mysql.com/)
