@@ -1,0 +1,16 @@
+{
+  "name": "sink-elastic-calls-clientes",
+  "config": {
+    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+    "connection.url": "http://localhost:9200",
+    "topics": "CALLS_CLIENTES_ENR",
+    "type.name": "_doc",
+    "key.converter":"org.apache.kafka.connect.storage.StringConverter",
+    "key.ignore": true,
+    "schema.ignore": true,
+    "errors.tolerance": "all",
+    "errors.log.enable":true,
+    "errors.log.include.messages":true,
+    "behavior.on.malformed.documents": "warn"
+  }
+}

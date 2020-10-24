@@ -38,6 +38,6 @@ You can check the result with:
 foo@bar:~$ kafka-avro-console-consumer --bootstrap-server localhost:9092 --topic CALLS_CLIENTES_ENR --from-beginning
 ```
 
-### Notes
+### Dashboard
 
-This project is not finished, sink connectors will be included to better visualize the result.
+![alt text](images/Dashboard_Rosetta.jpg "Dashboard Rosetta Demo")

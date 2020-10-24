@@ -105,6 +105,12 @@ insert into porta_orders (portab_request_id,directory_number_id,portab_doc_id,po
 receiving_operator_des,portab_order_date)
 values (898,'600000019','34544546P','DIFERIDA','MOVISTAR','ORANGE','2019-12-17 0:00:00');
 
+--future client
+insert into scoring (scr_id,document_id,riesgo,scr_date) values (4453445,'64545457X','ALTO','2019-04-07 0:00:00');
+insert into porta_orders (portab_request_id,directory_number_id,portab_doc_id,portab_type_des,donor_operator_des,
+receiving_operator_des,portab_order_date)
+values (899,'600000011','64545457X','DIFERIDA','VODAFONE','ORANGE','2019-04-07 0:00:00');
+
 --borrar clients
 delete from scoring where scr_id = 8945655;
 delete from scoring where scr_id = 9345453;
