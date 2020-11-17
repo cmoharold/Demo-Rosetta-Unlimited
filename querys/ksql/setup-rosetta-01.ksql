@@ -93,7 +93,7 @@ CREATE STREAM CLIENTES_ENR WITH (VALUE_FORMAT='json') AS
            CASE WHEN c.customer_end_day_key IS NULL
                 THEN 1 ELSE 0 END AS cliente_orange,
            CASE WHEN c.customer_end_day_key IS NOT NULL
-                THEN CAST((c.customer_end_day_key - c.customer_ini_day_key)/1000/60/60/24 AS INTEGER) ELSE 0 END AS days_excliente
+                THEN CAST((c.customer_end_day_key - c.customer_ini_day_key)/1000/60/60/24 AS INT) ELSE 0 END AS days_excliente
     FROM CUSTOMERS_KEY_DOC c
             INNER JOIN SERVICES_T s
                 ON c.dwh_customer_key = s.id_cliente EMIT CHANGES PARTITION BY telef_y_doc;
@@ -116,16 +116,19 @@ CREATE TABLE CLIENTES_T (telef_y_doc VARCHAR, c_document_id VARCHAR,
     WITH(KAFKA_TOPIC='CLIENTES_ENR_SCR', VALUE_FORMAT='json', KEY='telef_y_doc');
 
 --CUADRO DE MANDO CLIENTES ORANGE
-CREATE TABLE CLIENTES_PORTA_SCR_T AS
-    SELECT CASE WHEN c.telef_y_doc IS NOT NULL THEN c.telef_y_doc ELSE p.telef_y_doc END AS telef_y_doc,
+CREATE TABLE CLIENTES_PORTA_SCR_T
+WITH (
+PARTITIONS=1, REPLICAS=1,
+VALUE_FORMAT='AVRO',
+VALUE_AVRO_SCHEMA_FULL_NAME='com.harold.kafka.streams.schemas.avro.CustomerAggregate')
+AS SELECT CASE WHEN c.telef_y_doc IS NOT NULL THEN c.telef_y_doc ELSE p.telef_y_doc END AS telef_y_doc,
 		   CASE WHEN c.telefono IS NOT NULL THEN c.telefono ELSE p.directory_number_id END AS telefono,
 		   CASE WHEN c.c_document_id IS NOT NULL THEN c.c_document_id ELSE p.portab_doc_id END AS doc_cliente,
            CASE WHEN c.cliente_orange IS NULL THEN 0 ELSE c.cliente_orange END AS cliente_orange,
-           c.days_excliente,
+           CASE WHEN c.days_excliente IS NULL THEN 0 ELSE c.days_excliente END AS days_excliente,
            CASE WHEN c.cliente_orange=1 THEN 'ORANGE'
 			WHEN ((c.cliente_orange=0 OR c.cliente_orange IS NULL) AND p.donor_operator_des<>'ORANGE')
             THEN p.donor_operator_des ELSE p.receiving_operator_des END AS operador_actual,
 		   CASE WHEN p.riesgo IS NOT NULL THEN p.riesgo ELSE c.riesgo END AS riesgo
     FROM CLIENTES_T c
            FULL OUTER JOIN PORTABILIDADES_T p ON c.telef_y_doc = p.telef_y_doc EMIT CHANGES;
-

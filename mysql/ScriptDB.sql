@@ -103,28 +103,3 @@ insert into porta_orders (portab_request_id,directory_number_id,portab_doc_id,po
 insert into porta_orders (portab_request_id,directory_number_id,portab_doc_id,portab_type_des,donor_operator_des,receiving_operator_des,portab_order_date) values (778,'600000005','57453454P','DIFERIDA','ORANGE','MOVISTAR','2019-06-17 0:00:00');
 insert into porta_orders (portab_request_id,directory_number_id,portab_doc_id,portab_type_des,donor_operator_des,receiving_operator_des,portab_order_date) values (112,'600000007','32453434C','DIFERIDA','ORANGE','VODAFONE','2020-12-17 0:00:00');
 insert into porta_orders (portab_request_id,directory_number_id,portab_doc_id,portab_type_des,donor_operator_des,receiving_operator_des,portab_order_date) values (887,'600000009','12334555T','DIFERIDA','ORANGE','VODAFONE','2015-02-09 0:00:00');
-
---update client
-insert into scoring (scr_id,document_id,riesgo,scr_date) values (8945655,'10000000W','MEDIO','2020-12-17 0:00:00');
-insert into porta_orders (portab_request_id,directory_number_id,portab_doc_id,portab_type_des,donor_operator_des,
-receiving_operator_des,portab_order_date)values (897,'600000018','10000000W','DIFERIDA','VODAFONE','ORANGE','2020-12-17 0:00:00');
-
---future client
-insert into scoring (scr_id,document_id,riesgo,scr_date) values (9345453,'34544546P','BAJO','2019-12-17 0:00:00');
-insert into porta_orders (portab_request_id,directory_number_id,portab_doc_id,portab_type_des,donor_operator_des,
-receiving_operator_des,portab_order_date)
-values (898,'600000019','34544546P','DIFERIDA','MOVISTAR','ORANGE','2019-12-17 0:00:00');
-
---future client
-insert into scoring (scr_id,document_id,riesgo,scr_date) values (4453445,'64545457X','ALTO','2019-04-07 0:00:00');
-insert into porta_orders (portab_request_id,directory_number_id,portab_doc_id,portab_type_des,donor_operator_des,
-receiving_operator_des,portab_order_date)
-values (899,'600000011','64545457X','DIFERIDA','VODAFONE','ORANGE','2019-04-07 0:00:00');
-
---borrar clients
-delete from scoring where scr_id = 8945655;
-delete from scoring where scr_id = 9345453;
-delete from scoring where scr_id = 4453445;
-delete from porta_orders where portab_request_id = 897;
-delete from porta_orders where portab_request_id = 898;
-delete from porta_orders where portab_request_id = 899;

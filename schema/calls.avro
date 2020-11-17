@@ -1,6 +1,6 @@
 {
-  "namespace": "streams",
-  "name": "calls",
+  "namespace": "com.harold.kafka.streams.schemas.avro",
+  "name": "Calls",
   "type": "record",
   "fields": [
   	{

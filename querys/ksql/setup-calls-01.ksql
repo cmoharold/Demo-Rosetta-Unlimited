@@ -3,7 +3,12 @@ SET 'auto.offset.reset'='earliest';
 CREATE stream CALLS
 WITH (kafka_topic='CALLS', value_format='avro', timestamp='calltime');
 
-CREATE TABLE CALLS_AGG as select windowstart() as window_start_ts,
+CREATE TABLE CALLS_AGG
+WITH (
+PARTITIONS=1, REPLICAS=1,
+VALUE_FORMAT='AVRO',
+VALUE_AVRO_SCHEMA_FULL_NAME='com.harold.kafka.streams.schemas.avro.CallAggregate')
+AS SELECT windowstart() as window_start_ts,
 cast(id_telef_origen as string) as id_telef_origen,
 count(*) as calls_count,
 max(duracion_origen) as max_duracion_origen,
